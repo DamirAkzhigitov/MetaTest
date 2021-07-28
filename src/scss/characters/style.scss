@@ -2,17 +2,18 @@
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
-  margin-left: -10px;
   max-height: 600px;
   overflow-y: scroll;
+  margin: 0 0 0 -10px;
 }
 
 .characters__item {
-  max-width: 250px;
+  width: 250px;
   min-height: 400px;
   margin: 10px 0 0 10px;
   display: flex;
   flex-flow: column;
+  flex: 1 1 auto;
 
   &-description {
     display: flex;
@@ -30,7 +31,7 @@
   }
 
   &-avatar {
-    height: 250px;
+    height: 330px;
     //background-image: attr(data-image url);
     background-repeat: no-repeat;
     background-position: inherit;
@@ -39,7 +40,7 @@
 }
 
 .description {
-  width: 250px;
+  width: 100%;
   display: flex;
   flex-flow: row nowrap;
 
@@ -47,5 +48,12 @@
     min-width: 100px;
     display: inline-block;
     font-weight: 600;
+  }
+}
+
+
+@media screen and (max-width: 500px) {
+  .characters__item {
+    max-width: inherit;
   }
 }

@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title><%= htmlWebpackPlugin.options.title %></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,17 +21,23 @@
       <div class="chart__menu">
         <div class="chart__menu-action">
           <div class="title">Apperance</div>
-          <button class="button" data-action="season-1">Season 1</button>
-          <button class="button" data-action="season-2">Season 2</button>
-          <button class="button" data-action="season-3">Season 3</button>
-          <button class="button" data-action="season-4">Season 4</button>
+          <div class="buttons">
+            <button class="button" data-action="season-1">Season 1</button>
+            <button class="button" data-action="season-2">Season 2</button>
+            <button class="button" data-action="season-3">Season 3</button>
+            <button class="button" data-action="season-4">Season 4</button>
+          </div>
+
         </div>
         <div class="chart__menu-action">
           <div class="title">Status</div>
-          <select name="is dead?" id="">
-            <option value="dead">Dead</option>
-          </select>
-          <button class="button button_accent" type="button">Search</button>
+          <div class="buttons">
+            <select class="select" data-action="status" name="Character status">
+              <option value="all">All</option>
+            </select>
+            <button class="button button_accent" type="button">Search</button>
+          </div>
+
 
         </div>
       </div>
