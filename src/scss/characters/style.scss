@@ -1,38 +1,45 @@
-.characters__item-description {
+.characters__list {
   display: flex;
-  flex-flow: column;
-  padding: 10px;
-  font-size: 13px;
-  border: 1px solid var(--color-bg-border);
-}
-.description {
-  width: 250px;
-  display: flex;
-  flex-flow: row nowrap;
-}
-.description-name {
-  min-width: 100px;
-  display: inline-block;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  margin-left: -10px;
 }
 
 .characters__item {
   max-width: 250px;
+  margin: 10px 0 0 10px;
+
+  &-description {
+    display: flex;
+    flex-flow: column;
+    padding: 10px;
+    font-size: 13px;
+    border: 1px solid var(--color-bg-border);
+  }
+
+  &-title {
+    padding: 10px;
+    border: 1px solid var(--color-bg-border);
+    font-weight: 600;
+  }
+
+  &-avatar {
+    height: 250px;
+    //background-image: attr(data-image url);
+    background-repeat: no-repeat;
+    background-position: inherit;
+    background-size: cover;
+  }
 }
 
-.characters__item-title {
-  padding: 10px;
-  border: 1px solid var(--color-bg-border);
-  font-weight: 600;
-}
+.description {
+  width: 250px;
+  display: flex;
+  flex-flow: row nowrap;
 
-.characters__item-avatar {
-  height: 250px;
-  background: url("https://images.amcnetworks.com/amc.com/wp-content/uploads/2015/04/cast_bb_700x1000_walter-white-lg.jpg") no-repeat;
-  background-position: inherit;
-  background-size: cover;
-}
-
-.characters__item-description-name {
-  font-weight: 600;
-  margin-right: 10px;
+  &-name {
+    min-width: 100px;
+    display: inline-block;
+    font-weight: 600;
+  }
 }
