@@ -1,13 +1,18 @@
 .characters__list {
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-left: -10px;
+  max-height: 600px;
+  overflow-y: scroll;
 }
 
 .characters__item {
   max-width: 250px;
+  min-height: 400px;
   margin: 10px 0 0 10px;
+  display: flex;
+  flex-flow: column;
 
   &-description {
     display: flex;
@@ -15,6 +20,7 @@
     padding: 10px;
     font-size: 13px;
     border: 1px solid var(--color-bg-border);
+    height: 100%;
   }
 
   &-title {
