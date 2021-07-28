@@ -5,8 +5,34 @@
   <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 <body>
-  <div>
+  <div class="main theme theme_color_project-default">
+    <header class="chart chart_space">
+      <div class="chart__canvas">
+        <div class="title">What is Lorem Ipsum?</div>
+        <div class="chart__canvas-item">
+          <canvas class="canvas"></canvas>
+        </div>
+      </div>
+      <div class="chart__menu">
+        <div class="chart__menu-action">
+          <div class="title">Apperance</div>
+        </div>
+        <div class="chart__menu-action">
+          <div class="title">Status</div>
+          <button class="button" type="button">Button</button>
+          <button class="button button_accent" type="button">Accent</button>
+          <button class="button button_selected" type="button">Selected</button>
 
+        </div>
+      </div>
+    </header>
+    <section class="characters">
+      <div class="characters__content">
+        <ul class="characters__list">
+          <li class="characters__item"></li>
+        </ul>
+      </div>
+    </section>
   </div>
 </body>
 </html>

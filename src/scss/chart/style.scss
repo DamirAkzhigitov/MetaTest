@@ -1,0 +1,10 @@
+.chart {
+  display: flex;
+  flex-flow: row wrap;
+
+  background-color: var(--color-bg-brand);
+
+  &_space {
+    padding: 20px;
+  }
+}

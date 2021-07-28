@@ -1,0 +1,45 @@
+/* Базовые цвета от которых выстраивается вся политра */
+$color-base-default: #FFFFFF;
+$color-base-accent: #edbe39;
+$color-base-border: #000000;
+$color-base-brand: #4b77b9;
+
+$color-base-base: #000000;
+$color-base-secondary: rgba(0,0,0, 0.6);
+$color-base-additional: rgb(255, 255, 255);
+$color-base-path: #0077ff;
+
+/* Цвета фона */
+$color-bg-default: $color-base-default; /* Цвет дефотный */
+$color-bg-secondary: lighten($color-base-brand, 10);
+$color-bg-accent: $color-base-accent; /* Цвет акцентный */
+$color-bg-accent-hover: lighten($color-base-accent, 30);
+$color-bg-border: $color-base-border; /* Цвет границ */
+$color-bg-brand: $color-base-brand;
+
+/* Цвета текста */
+$color-typo-primary: $color-base-base; /* Цвет основного текста */
+$color-typo-secondary: $color-base-secondary; /* Цвет второстепенного текста */
+$color-typo-additional: $color-base-additional; /* Цвет дополнительного текста */
+$color-link: $color-base-path; /* Цвет основной ссылки */
+$color-link-hover: color($color-base-path l(-7%)); /* Цвет ховера ссылки */
+$color-typo-ghost: color($color-base-base a(30%));
+
+.theme_color_project-default {
+
+  /* Цвета блоков */
+  --color-bg-default: #{$color-bg-default}; /* Цвет дефолта */
+  --color-bg-accent: #{$color-bg-accent}; /* Цвет акцентный */
+  --color-bg-border: #{$color-bg-border}; /* Цвет границ */
+  --color-bg-brand: #{$color-bg-brand};
+  --color-bg-accent-hover: #{$color-bg-accent-hover};
+  --color-bg-secondary: #{$color-bg-secondary};
+
+  /* Цвета текста */
+  --color-typo-primary: #{$color-typo-primary}; /* Цвет основного текста */
+  --color-typo-secondary: #{$color-typo-secondary}; /* Цвет второстепенного текста */
+  --color-typo-additional: #{$color-typo-additional}; /* Цвет брендового текста */
+  --color-link: #{$color-link}; /* Цвет основной ссылки */
+  --color-link-hover: #{$color-link-hover};
+  --color-typo-ghost: #{$color-typo-ghost};
+}
