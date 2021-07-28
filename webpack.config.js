@@ -12,7 +12,7 @@ module.exports = {
   },
   devServer: {
     port: 8080,
-    contentBase: path.join(__dirname, 'dist'),
+    contentBase: path.join(__dirname, 'src'),
     watchContentBase: true,
     hot: true
   },
@@ -65,7 +65,10 @@ module.exports = {
   },
   plugins: [
     // new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
-    new HtmlWebpackPlugin({ template: './src/html/index.html'}),
+    new HtmlWebpackPlugin({
+      title: 'Privet',
+      template: './src/html/index.html'
+    }),
     require('autoprefixer'),
     require('cssnano'),
     new MiniCssExtractPlugin({
