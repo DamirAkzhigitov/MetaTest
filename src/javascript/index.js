@@ -15,17 +15,29 @@ const getList = async (limit, offset) => {
   return list
 };
 
-const setFilter = (filterData) => {
-  localStorage.setItem('filter', JSON.stringify({...filterData}))
+const clearLocalStorageField = (key) => {
+  if (!key) return
+
+  localStorage.removeItem(key)
 }
 
-const checkFilter = () => {
-  const filter = localStorage.getItem('filter')
+const setToLocalStorage = (key, data) => {
+  if (!data || !key) {
+    return
+  }
 
-  if (filter) {
+  const value = typeof data === "object" ? JSON.stringify(data) : data
+
+  localStorage.setItem(key, value)
+}
+
+const getFromLocalStorage = (key) => {
+  const item = localStorage.getItem(key)
+
+  if (item) {
     let result = null
     try {
-      result = JSON.parse(filter)
+      result = JSON.parse(item)
     } catch (e) {
       console.error(e)
     }
@@ -35,14 +47,14 @@ const checkFilter = () => {
 }
 
 const checkActiveState = () => {
-  const filter = checkFilter()
+  const filter = getFromLocalStorage('filter')
 
   if (filter && filter.active) {
     const selector = `season-${filter.value}`
 
     const button = document.querySelector(`[data-action="${selector}"]`)
 
-    button.classList.add('button_selected')
+    if (button) button.classList.add('button_selected')
   }
 }
 
@@ -98,41 +110,66 @@ const optionChild = (value) => {
   return `<option value="${value}">${value}</option>`
 }
 
+const areSetsEqual = (a, b) => a.size === b.size && [...a].every(value => b.has(value));
+
 const init = async () => {
   const main = document.querySelector(".characters__list");
+  const select = document.querySelector('[data-action=status]')
 
-  let currentFilter = checkFilter()
+  const cachedStatusList = getFromLocalStorage('statusList')
+  let currentFilter = getFromLocalStorage('filter')
   let list = [];
   let limit = 10;
   let offset = 0;
+  let statusList = cachedStatusList ? new Set([...cachedStatusList]) : new Set()
+
+  Array.from(statusList).forEach((status) => {
+    select.insertAdjacentHTML('beforeend', optionChild(status))
+  })
+
+  console.log('statusList) = ', statusList);
+  statusList.add('All')
 
   checkActiveState()
 
   const getStatuses = () => {
-    const select = document.querySelector('[data-action=status]')
+    const tempSet = new Set()
+    tempSet.add('All')
+
+
+    list.forEach((item) => {
+      tempSet.add(item.status)
+    })
+
+    if (areSetsEqual(statusList, tempSet) || tempSet.size < statusList.size) {
+      return
+    }
 
     select.innerHTML = ''
 
-    const statusList = new Set()
-
-    list.forEach((item) => {
-      statusList.add(item.status)
-    })
-
+    statusList = tempSet
 
     Array.from(statusList).forEach((status) => {
       select.insertAdjacentHTML('beforeend', optionChild(status))
     })
+
+    setToLocalStorage('statusList', Array.from(statusList))
+
+
     console.log(select);
 
     console.log('st = ', );
   }
 
   const getListAndRenderIt = async () => {
+    currentFilter = getFromLocalStorage('filter')
+
     const response = await getList(limit, offset)
     let filtredData = []
 
-    currentFilter = checkFilter()
+    console.log('currentFilter = ', currentFilter);
+
+    console.log('response = ', response);
 
     if (currentFilter && currentFilter.active) {
       if (currentFilter.isArray) {
@@ -142,10 +179,18 @@ const init = async () => {
           })
         })
       } else {
+        console.log('else filter');
+
         filtredData = response.filter((item) => {
           const regExp = new RegExp(currentFilter.value)
 
-          return regExp.exec(item[currentFilter.field])
+          console.log('response item status = ', item.status);
+
+          const result = regExp.exec(item[currentFilter.field])
+
+          console.log('check regexp = ', currentFilter.value, ', result = ', result)
+
+          return result
         })
       }
     } else {
@@ -163,19 +208,26 @@ const init = async () => {
   await getListAndRenderIt()
 
   const scrollHandler = () => {
+    if (window.scrollY % 25) {
+      return
+    }
     if (
-      main.scrollTop + main.getBoundingClientRect().height >=
+        window.scrollY + main.getBoundingClientRect().height >=
       main.scrollHeight
     ) {
-      offset += 10;
+      console.log('scrolled to bottom');
 
       getListAfterScroll();
     }
   }
 
-  const getListAfterScroll = throttle(getListAndRenderIt, 1000);
+  const getListAfterScroll = throttle(() =>{
+    offset += 10;
 
-  main.addEventListener("scroll", scrollHandler, true);
+    getListAndRenderIt()
+  }, 1000);
+
+  window.addEventListener("scroll", scrollHandler, true);
 
   const seasonButtons = document.querySelectorAll('[data-action*="season"]');
 
@@ -200,23 +252,75 @@ const init = async () => {
 
     button.addEventListener("click", async () => {
       if (button.classList.contains('button_selected')) {
-        setFilter(null)
+
+        limit = 10
+        offset = 0
+
+        clearLocalStorageField('filter')
       } else {
-        setFilter({
+
+        limit = 70
+        offset = 0
+
+        setToLocalStorage('filter', {
           field: 'appearance',
           value: Number(season),
           isArray: true,
-          active: true
+          active: true,
         })
       }
       setCurrentBtnActive(button, seasonButtons)
 
       main.innerHTML = "";
-      offset = 0
 
       await getListAndRenderIt()
     });
   });
+
+  const searchButton = document.querySelector('[data-action="search"]')
+  const statusSelector = document.querySelector('[data-action="status"]')
+  let selectedStatus = ''
+
+  // statusSelector.addEventListener('change', ({target }) => {
+  //   console.log('selectedStatus = ', target.value);
+  //   selectedStatus = target.value
+  // })
+
+  searchButton.addEventListener('click', async () => {
+    console.log('selectedStatus = ', selectedStatus, ' === ', statusSelector.value);
+    if (selectedStatus === statusSelector.value) {
+      return
+    }
+
+    selectedStatus = statusSelector.value
+
+    if (!selectedStatus) {
+      return
+    }
+
+    if (typeof selectedStatus === "string" && selectedStatus === 'All') {
+      clearLocalStorageField('filter')
+      limit = 10
+      offset = 0
+
+    } else {
+
+      limit = 70
+      offset = 0
+
+      const filter = {
+        field: 'status',
+        value: selectedStatus,
+        isArray: false,
+        active: true,
+      }
+      setToLocalStorage('filter', filter)
+    }
+
+    main.innerHTML = "";
+
+    await getListAndRenderIt()
+  })
 };
 
 init();
