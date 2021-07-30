@@ -9,35 +9,48 @@ import {
   getFiltredData,
   setCurrentBtnActive,
   createCharacterItem,
+  optionChild
 } from './utils'
 
-const checkActiveState = () => {
+const checkActiveState = (statusList, currentState) => {
+  Array.from(statusList).forEach((status) => {
+    currentState.insertAdjacentHTML('beforeend', optionChild(status))
+  })
   const filters = getFromLocalStorage('filterStorage')
-  const array = []
 
   if (Array.isArray(filters)) {
     filters.forEach((filter) => {
-      const selector = `season-${filter.value}`
+      if (filter.field === 'appearance') {
+        const selector = `season-${filter.value}`
+        const button = document.querySelector(`[data-action="${selector}"]`)
 
-      const button = document.querySelector(`[data-action="${selector}"]`)
+        if (button) button.classList.add('button_selected')
+      }
+      if (filter.field === 'status') {
+        const options = document.querySelectorAll('[data-action="status"] > option')
+        options.forEach((option) => {
+          const optionValue = option.value.toLowerCase()
+          const filterValue = filter.value.toLowerCase()
 
-      if (button) button.classList.add('button_selected')
+          if (optionValue === filterValue) option.selected = true
+        })
+      }
+
     })
   }
 }
 
-const clearStatusesOptions = () => {
-  const select = document.querySelector('[data-action=status]')
-
-  select.querySelectorAll('option').forEach((option) => {
+const clearStatusesOptions = (selectListElement) => {
+  if (!selectListElement) {
+    return
+  }
+  selectListElement.querySelectorAll('option').forEach((option) => {
     if (option.value !== 'All') option.remove()
   })
 }
 
 const disableFilterItem = (filterItem) => {
   let tempFilterStorage = getFromLocalStorage('filterStorage')
-  // console.log('filterItem = ', filterItem)
-  // console.log('tempFilterStorage = ', tempFilterStorage)
 
   tempFilterStorage = tempFilterStorage.filter((filter) => {
     return !(
@@ -45,14 +58,12 @@ const disableFilterItem = (filterItem) => {
     )
   })
 
-  // console.log('after remove = ', tempFilterStorage)
-
   return tempFilterStorage
 }
 
 const init = async () => {
   const main = document.querySelector('.characters__list')
-  const select = document.querySelector('[data-action=status]')
+  const selectListElement = document.querySelector('[data-action=status]')
   const searchButton = document.querySelector('[data-action="search"]')
   const statusSelector = document.querySelector('[data-action="status"]')
   const seasonButtons = document.querySelectorAll('[data-action*="season"]')
@@ -67,12 +78,6 @@ const init = async () => {
   let statusList = cachedStatusList ? new Set([...cachedStatusList]) : new Set()
   let selectedStatus = ''
 
-  Array.from(statusList).forEach((status) => {
-    select.insertAdjacentHTML('beforeend', optionChild(status))
-  })
-
-  checkActiveState()
-
   const getStatuses = () => {
     const tempSet = new Set()
 
@@ -84,12 +89,12 @@ const init = async () => {
       return
     }
 
-    clearStatusesOptions()
+    clearStatusesOptions(selectListElement)
 
     statusList = tempSet
 
     Array.from(statusList).forEach((status) => {
-      select.insertAdjacentHTML('beforeend', optionChild(status))
+      selectListElement.insertAdjacentHTML('beforeend', optionChild(status))
     })
     const array = Array.from(statusList)
 
@@ -122,66 +127,39 @@ const init = async () => {
   await getListAndRenderIt()
 
   const scrollHandler = () => {
-    if (window.scrollY % 25) {
+    // throttling
+    if (Number(window.scrollY.toFixed(0)) % 10) {
       return
     }
-    if (
-      window.scrollY + main.getBoundingClientRect().height + 100 >=
-      main.scrollHeight
-    ) {
-      console.log('scrolled to bottom')
+    const result = window.scrollY + document.body.getBoundingClientRect().height + 260
+    const docScrollHeight = document.body.scrollHeight
 
-      getListAfterScroll()
-    }
+    if (result >= docScrollHeight) getListAfterScroll()
   }
 
   const getListAfterScroll = throttle(() => {
     offset += 10
 
     getListAndRenderIt()
-  }, 1000)
+  }, 500)
 
-  window.addEventListener('scroll', scrollHandler, true)
+  const setItemToFilters = (filter) => {
+    if (typeof filter !== 'object') {
+      return
+    }
 
-  seasonButtons.forEach((button) => {
-    const season = button.getAttribute('data-action').split('-')[1]
+    if (filter.field === 'status') {
+      filterStorage = filterStorage.filter((item) => {
+        return item.field !== 'status'
+      })
+    }
 
-    button.addEventListener('click', async () => {
-      if (button.classList.contains('button_selected')) {
-        limit = 10
-        offset = 0
+    filterStorage.push(filter)
 
-        // console.log('call disableFilterItem')
+    setToLocalStorage('filterStorage', filterStorage)
+  }
 
-        filterStorage = disableFilterItem({
-          field: 'appearance',
-          value: Number(season),
-        })
-        // console.log('call disableFilterItem, after = ', filterStorage)
-
-        setToLocalStorage('filterStorage', filterStorage)
-      } else {
-        limit = 70
-        offset = 0
-
-        filterStorage.push({
-          field: 'appearance',
-          value: Number(season),
-          isArray: true,
-          active: true,
-        })
-        // console.log('seasonButtons setToLocalStorage =  ', filterStorage)
-        setToLocalStorage('filterStorage', filterStorage)
-      }
-      setCurrentBtnActive(button)
-
-      main.innerHTML = ''
-
-      await getListAndRenderIt()
-    })
-  })
-
-  searchButton.addEventListener('click', async () => {
+  const searchButtonHandler = async () => {
     if (selectedStatus === statusSelector.value) {
       return
     }
@@ -192,7 +170,7 @@ const init = async () => {
       return
     }
 
-    if (typeof selectedStatus === 'string' && selectedStatus === 'All') {
+    if (typeof selectedStatus === 'string' && selectedStatus.toLowerCase() === 'all') {
       filterStorage = disableFilterItem({
         field: 'status',
         value: selectedStatus,
@@ -204,23 +182,58 @@ const init = async () => {
       limit = 10
       offset = 0
     } else {
-      limit = 70
+
+      limit = 10
       offset = 0
 
-      filterStorage.push({
+      setItemToFilters({
         field: 'status',
         value: selectedStatus,
         isArray: false,
         active: true,
       })
-
-      setToLocalStorage('filterStorage', filterStorage)
     }
 
     main.innerHTML = ''
 
     await getListAndRenderIt()
-  })
+  }
+  const seasonButtonHandler = async ({ target }) => {
+    const season = target.getAttribute('data-action').split('-')[1]
+
+    if (target.classList.contains('button_selected')) {
+      limit = 10
+      offset = 0
+
+      filterStorage = disableFilterItem({
+        field: 'appearance',
+        value: Number(season),
+      })
+
+      setToLocalStorage('filterStorage', filterStorage)
+    } else {
+      limit = 10
+      offset = 0
+
+      setItemToFilters({
+        field: 'appearance',
+        value: Number(season),
+        isArray: true,
+        active: true,
+      })
+    }
+    setCurrentBtnActive(target)
+
+    main.innerHTML = ''
+
+    await getListAndRenderIt()
+  }
+
+  checkActiveState(statusList, selectListElement)
+
+  window.addEventListener('scroll', scrollHandler, true)
+  searchButton.addEventListener('click', searchButtonHandler)
+  seasonButtons.forEach((button) => button.addEventListener('click', seasonButtonHandler))
 }
 
 init()
