@@ -37,6 +37,9 @@
   }
 
   &:hover {
+    background-color: var(--color-bg-accent-hover);
+  }
+  &:active {
     background-color: var(--color-bg-default);
   }
 
