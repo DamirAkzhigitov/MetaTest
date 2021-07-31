@@ -8,9 +8,9 @@
 }
 .buttons {
   display: flex;
+  flex-flow: row wrap;
 
   & > button, select {
-    flex: 1;
     margin: 5px 0 0 5px;
   }
 }

@@ -1,5 +1,5 @@
 import '../scss/styles.scss'
-
+import chart from './chart'
 import {
   throttle,
   areSetsEqual,
@@ -9,8 +9,17 @@ import {
   getFiltredData,
   setCurrentBtnActive,
   createCharacterItem,
-  optionChild
+  optionChild,
 } from './utils'
+import { getListOfCharactersInSeasons } from './espisodes'
+
+chart(document.querySelector('.canvas'), [
+  [0, 25],
+  [1, 10],
+  [2, 32],
+  [3, 36],
+  [4, 24],
+])
 
 const checkActiveState = (statusList, currentState) => {
   Array.from(statusList).forEach((status) => {
@@ -27,7 +36,9 @@ const checkActiveState = (statusList, currentState) => {
         if (button) button.classList.add('button_selected')
       }
       if (filter.field === 'status') {
-        const options = document.querySelectorAll('[data-action="status"] > option')
+        const options = document.querySelectorAll(
+          '[data-action="status"] > option'
+        )
         options.forEach((option) => {
           const optionValue = option.value.toLowerCase()
           const filterValue = filter.value.toLowerCase()
@@ -35,7 +46,6 @@ const checkActiveState = (statusList, currentState) => {
           if (optionValue === filterValue) option.selected = true
         })
       }
-
     })
   }
 }
@@ -121,7 +131,11 @@ const init = async () => {
       createCharacterItem(item)
     })
 
+    const res = getListOfCharactersInSeasons(list)
+
     getStatuses()
+
+    offset += 10
   }
 
   await getListAndRenderIt()
@@ -131,15 +145,14 @@ const init = async () => {
     if (Number(window.scrollY.toFixed(0)) % 10) {
       return
     }
-    const result = window.scrollY + document.body.getBoundingClientRect().height + 260
+    const result =
+      window.scrollY + document.body.getBoundingClientRect().height + 260
     const docScrollHeight = document.body.scrollHeight
 
     if (result >= docScrollHeight) getListAfterScroll()
   }
 
   const getListAfterScroll = throttle(() => {
-    offset += 10
-
     getListAndRenderIt()
   }, 500)
 
@@ -153,8 +166,9 @@ const init = async () => {
         return item.field !== 'status'
       })
     }
-
-    filterStorage.push(filter)
+    if (filter.value !== 'all') {
+      filterStorage.push(filter)
+    }
 
     setToLocalStorage('filterStorage', filterStorage)
   }
@@ -170,29 +184,15 @@ const init = async () => {
       return
     }
 
-    if (typeof selectedStatus === 'string' && selectedStatus.toLowerCase() === 'all') {
-      filterStorage = disableFilterItem({
-        field: 'status',
-        value: selectedStatus,
-      })
-      // console.log('searchButton setToLocalStorage =  ', filterStorage)
+    limit = 10
+    offset = 0
 
-      setToLocalStorage('filterStorage', filterStorage)
-
-      limit = 10
-      offset = 0
-    } else {
-
-      limit = 10
-      offset = 0
-
-      setItemToFilters({
-        field: 'status',
-        value: selectedStatus,
-        isArray: false,
-        active: true,
-      })
-    }
+    setItemToFilters({
+      field: 'status',
+      value: selectedStatus,
+      isArray: false,
+      active: true,
+    })
 
     main.innerHTML = ''
 
@@ -233,7 +233,9 @@ const init = async () => {
 
   window.addEventListener('scroll', scrollHandler, true)
   searchButton.addEventListener('click', searchButtonHandler)
-  seasonButtons.forEach((button) => button.addEventListener('click', seasonButtonHandler))
+  seasonButtons.forEach((button) =>
+    button.addEventListener('click', seasonButtonHandler)
+  )
 }
 
 init()

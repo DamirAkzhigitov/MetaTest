@@ -13,3 +13,13 @@
     }
   }
 }
+
+@media screen and (max-width: 800px) {
+  .chart__menu {
+    order: -1
+  }
+}
+
+.canvas {
+  //border: 1px solid #dbdbdb;
+}
