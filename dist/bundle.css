@@ -1,0 +1,222 @@
+/*!****************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./src/scss/reset/style.css ***!
+  \****************************************************************************/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+body {
+    line-height: 1;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/*!*************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[1].use[3]!./src/scss/styles.scss ***!
+  \*************************************************************************************************************************************************************************************/
+@charset "UTF-8";
+/* Базовые цвета от которых выстраивается вся политра */
+/* Цвета фона */
+/* Цвет дефотный */
+/* Цвет акцентный */
+/* Цвет границ */
+/* Цвета текста */
+/* Цвет основного текста */
+/* Цвет второстепенного текста */
+/* Цвет дополнительного текста */
+/* Цвет основной ссылки */
+/* Цвет ховера ссылки */
+.theme_color_project-default {
+  /* Цвета блоков */
+  --color-bg-default: #FFFFFF;
+  /* Цвет дефолта */
+  --color-bg-accent: #edbe39;
+  /* Цвет акцентный */
+  --color-bg-border: rgba(163, 163, 163, 0.6);
+  /* Цвет границ */
+  --color-bg-brand: #4b77b9;
+  --color-bg-accent-hover: #faecc5;
+  --color-bg-secondary: #7093c7;
+  /* Цвета текста */
+  --color-typo-primary: #000000;
+  /* Цвет основного текста */
+  --color-typo-secondary: rgba(0, 0, 0, 0.6);
+  /* Цвет второстепенного текста */
+  --color-typo-additional: white;
+  /* Цвет брендового текста */
+  --color-link: #0077ff;
+  /* Цвет основной ссылки */
+  --color-link-hover: color(#0077ff l(-7%));
+  --color-typo-ghost: color(#000000 a(30%));
+}
+
+.theme {
+  background-color: var(--color-bg-default);
+}
+
+.characters__list {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  height: 800px;
+  margin: 0 0 0 -10px;
+}
+
+.characters__item {
+  width: 250px;
+  margin: 10px 0 0 10px;
+  display: flex;
+  flex-flow: column;
+}
+.characters__item-description {
+  display: flex;
+  flex-flow: column;
+  padding: 10px;
+  font-size: 13px;
+  border: 1px solid var(--color-bg-border);
+}
+.characters__item-title {
+  padding: 10px;
+  border: 1px solid var(--color-bg-border);
+  font-weight: 600;
+}
+.characters__item-avatar {
+  height: 330px;
+  background-repeat: no-repeat;
+  background-position: inherit;
+  background-size: cover;
+}
+
+.description {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+}
+.description-name {
+  min-width: 100px;
+  display: inline-block;
+  font-weight: 600;
+}
+
+@media screen and (max-width: 500px) {
+  .characters__item {
+    width: 100%;
+  }
+}
+.chart {
+  display: flex;
+  flex-flow: row wrap;
+  background-color: var(--color-bg-brand);
+}
+.chart_space {
+  padding: 20px;
+}
+.chart__menu-action {
+  padding: 10px;
+}
+
+@media screen and (max-width: 800px) {
+  .chart__menu {
+    order: -1;
+  }
+}
+.main {
+  max-width: 1366px;
+  margin: 0 auto;
+  padding: 36px;
+  font-family: "Open Sans", sans-serif;
+}
+
+.buttons {
+  display: flex;
+  flex-flow: row wrap;
+}
+.buttons > button, .buttons select {
+  margin: 5px 0 0 5px;
+}
+
+.button {
+  padding: 5px 20px;
+  border-radius: 5px;
+  background-color: var(--color-bg-secondary);
+  color: #000;
+  transition: background-color 0.1s;
+  cursor: pointer;
+  display: inline-block;
+  border: none;
+  margin: 0;
+  text-decoration: none;
+  font-family: sans-serif;
+  font-size: 1rem;
+  text-align: center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+.button_accent {
+  background-color: var(--color-bg-accent);
+}
+.button_accent:hover {
+  background-color: var(--color-bg-accent-hover);
+}
+.button_selected {
+  background-color: var(--color-bg-default);
+}
+.button:hover {
+  background-color: var(--color-bg-accent-hover);
+}
+.button:active {
+  background-color: var(--color-bg-default);
+}
+
+.title {
+  padding-bottom: 10px;
+}
+
+.text-white {
+  color: var(--color-typo-additional);
+}
+
+.select {
+  border-radius: 5px;
+  background-color: var(--color-bg-default);
+  padding: 5px 20px;
+}
+
+select::-ms-expand {
+  display: none;
+}
