@@ -2,240 +2,145 @@ import '../scss/styles.scss'
 import chart from './chart'
 import {
   throttle,
-  areSetsEqual,
   getFromLocalStorage,
-  setToLocalStorage,
+  updateStatuses,
   getList,
   getFiltredData,
-  setCurrentBtnActive,
+  toggleBtn,
   createCharacterItem,
-  optionChild,
+  setItemToFilters,
+  checkActiveState,
+  scrollHandler,
 } from './utils'
 import { getListOfCharactersInSeasons } from './espisodes'
 
-chart(document.querySelector('.canvas'), [
-  [0, 25],
-  [1, 10],
-  [2, 32],
-  [3, 36],
-  [4, 24],
-])
-
-const checkActiveState = (statusList, currentState) => {
-  Array.from(statusList).forEach((status) => {
-    currentState.insertAdjacentHTML('beforeend', optionChild(status))
-  })
-  const filters = getFromLocalStorage('filterStorage')
-
-  if (Array.isArray(filters)) {
-    filters.forEach((filter) => {
-      if (filter.field === 'appearance') {
-        const selector = `season-${filter.value}`
-        const button = document.querySelector(`[data-action="${selector}"]`)
-
-        if (button) button.classList.add('button_selected')
-      }
-      if (filter.field === 'status') {
-        const options = document.querySelectorAll(
-          '[data-action="status"] > option'
-        )
-        options.forEach((option) => {
-          const optionValue = option.value.toLowerCase()
-          const filterValue = filter.value.toLowerCase()
-
-          if (optionValue === filterValue) option.selected = true
-        })
-      }
-    })
-  }
-}
-
-const clearStatusesOptions = (selectListElement) => {
-  if (!selectListElement) {
-    return
-  }
-  selectListElement.querySelectorAll('option').forEach((option) => {
-    if (option.value !== 'All') option.remove()
-  })
-}
-
-const disableFilterItem = (filterItem) => {
-  let tempFilterStorage = getFromLocalStorage('filterStorage')
-
-  tempFilterStorage = tempFilterStorage.filter((filter) => {
-    return !(
-      filter.value === filterItem.value && filter.field === filterItem.field
-    )
-  })
-
-  return tempFilterStorage
+const SELECTORS = {
+  CHARACTERS_LIST: '.characters__list',
+  STATUS_LIST: '[data-action=status]',
+  SEARCH_BUTTON: '[data-action="search"]',
+  SEASON_BUTTONS: '[data-action*="season"]',
 }
 
 const init = async () => {
-  const main = document.querySelector('.characters__list')
-  const selectListElement = document.querySelector('[data-action=status]')
-  const searchButton = document.querySelector('[data-action="search"]')
-  const statusSelector = document.querySelector('[data-action="status"]')
-  const seasonButtons = document.querySelectorAll('[data-action*="season"]')
+  const main = document.querySelector(SELECTORS.CHARACTERS_LIST)
+  const selectListElement = document.querySelector(SELECTORS.STATUS_LIST)
+  const searchButton = document.querySelector(SELECTORS.SEARCH_BUTTON)
+  const seasonButtons = document.querySelectorAll(SELECTORS.SEASON_BUTTONS)
 
   const cachedStatusList = getFromLocalStorage('statusList')
-
-  let filterStorage = getFromLocalStorage('filterStorage') || []
+  const getFilterStorage = () => getFromLocalStorage('filterStorage') || []
 
   let list = []
   let limit = 10
   let offset = 0
-  let statusList = cachedStatusList ? new Set([...cachedStatusList]) : new Set()
+  let getStatusList = () =>
+    cachedStatusList ? new Set([...cachedStatusList]) : new Set()
+
   let selectedStatus = ''
 
-  const getStatuses = () => {
-    const tempSet = new Set()
+  const resetData = async () => {
+    limit = 10
+    offset = 0
 
-    list.forEach((item) => {
-      tempSet.add(item.status)
-    })
-
-    if (areSetsEqual(statusList, tempSet) || tempSet.size < statusList.size) {
-      return
-    }
-
-    clearStatusesOptions(selectListElement)
-
-    statusList = tempSet
-
-    Array.from(statusList).forEach((status) => {
-      selectListElement.insertAdjacentHTML('beforeend', optionChild(status))
-    })
-    const array = Array.from(statusList)
-
-    // console.log('array = ', array)
-    setToLocalStorage('statusList', array)
+    list = []
+    main.innerHTML = ''
+    await getListAndRenderIt()
   }
 
   const getListAndRenderIt = async () => {
-    filterStorage = getFromLocalStorage('filterStorage') || []
-
-    const response = await getList(limit, offset)
-
-    let filtredData = []
-
-    if (!filterStorage || (filterStorage && !filterStorage.length)) {
-      filtredData = response
-    } else {
-      filtredData = getFiltredData(response, filterStorage)
+    let response = null
+    // get filter from local storage
+    const filterStorage = getFilterStorage()
+    // requesting a list of characters
+    try {
+      response = await getList(limit, offset)
+    } catch (e) {
+      console.error(e)
+    }
+    // guard expression if response not array
+    if (!response || !Array.isArray(response)) {
+      return
     }
 
-    list.push(...filtredData)
+    let filteredData = []
 
-    filtredData.forEach((item) => {
+    if (!filterStorage || (filterStorage && !filterStorage.length)) {
+      // filter is empty
+      filteredData = response
+    } else {
+      filteredData = getFiltredData(response, filterStorage)
+    }
+
+    list.push(...filteredData)
+
+    // render characters cards
+    filteredData.forEach((item) => {
       createCharacterItem(item)
     })
 
-    const res = getListOfCharactersInSeasons(list)
+    const charactersSeasonCount = getListOfCharactersInSeasons(list)
 
-    getStatuses()
+    chart(document.querySelector('.canvas'), charactersSeasonCount)
+
+    updateStatuses(list, selectListElement, getStatusList())
 
     offset += 10
-  }
-
-  await getListAndRenderIt()
-
-  const scrollHandler = () => {
-    // throttling
-    if (Number(window.scrollY.toFixed(0)) % 10) {
-      return
-    }
-    const result =
-      window.scrollY + document.body.getBoundingClientRect().height + 260
-    const docScrollHeight = document.body.scrollHeight
-
-    if (result >= docScrollHeight) getListAfterScroll()
   }
 
   const getListAfterScroll = throttle(() => {
     getListAndRenderIt()
   }, 500)
 
-  const setItemToFilters = (filter) => {
-    if (typeof filter !== 'object') {
-      return
-    }
-
-    if (filter.field === 'status') {
-      filterStorage = filterStorage.filter((item) => {
-        return item.field !== 'status'
-      })
-    }
-    if (filter.value !== 'all') {
-      filterStorage.push(filter)
-    }
-
-    setToLocalStorage('filterStorage', filterStorage)
-  }
-
   const searchButtonHandler = async () => {
-    if (selectedStatus === statusSelector.value) {
+    if (!selectListElement.value) {
+      return
+    }
+    if (selectedStatus === selectListElement.value) {
       return
     }
 
-    selectedStatus = statusSelector.value
+    selectedStatus = selectListElement.value
 
-    if (!selectedStatus) {
-      return
-    }
-
-    limit = 10
-    offset = 0
-
-    setItemToFilters({
+    setItemToFilters(getFilterStorage(), {
       field: 'status',
       value: selectedStatus,
       isArray: false,
       active: true,
     })
 
-    main.innerHTML = ''
-
-    await getListAndRenderIt()
+    await resetData()
   }
   const seasonButtonHandler = async ({ target }) => {
     const season = target.getAttribute('data-action').split('-')[1]
+    toggleBtn(target)
 
-    if (target.classList.contains('button_selected')) {
-      limit = 10
-      offset = 0
+    setItemToFilters(getFilterStorage(), {
+      field: 'appearance',
+      value: Number(season),
+      isArray: true,
+      active: true,
+    })
 
-      filterStorage = disableFilterItem({
-        field: 'appearance',
-        value: Number(season),
-      })
-
-      setToLocalStorage('filterStorage', filterStorage)
-    } else {
-      limit = 10
-      offset = 0
-
-      setItemToFilters({
-        field: 'appearance',
-        value: Number(season),
-        isArray: true,
-        active: true,
-      })
-    }
-    setCurrentBtnActive(target)
-
-    main.innerHTML = ''
-
-    await getListAndRenderIt()
+    await resetData()
   }
 
-  checkActiveState(statusList, selectListElement)
+  window.addEventListener(
+    'scroll',
+    () => {
+      scrollHandler(() => {
+        getListAfterScroll()
+      })
+    },
+    true
+  )
 
-  window.addEventListener('scroll', scrollHandler, true)
   searchButton.addEventListener('click', searchButtonHandler)
   seasonButtons.forEach((button) =>
     button.addEventListener('click', seasonButtonHandler)
   )
+  await getListAndRenderIt()
+
+  checkActiveState(getStatusList(), selectListElement)
 }
 
 init()

@@ -6,6 +6,7 @@ const ROWS_COUNT = 3
 const PADDING = 40
 const VIEW_HEIGHT = DPI_HEIGHT - PADDING * 2
 const VIEW_WIDTH = DPI_WIDTH
+const MARGIN = 20
 
 const getMinMax = (data) => {
   let min, max
@@ -32,6 +33,42 @@ const line = (ctx, coords) => {
   ctx.closePath()
 }
 
+const dot = (ctx, x, y, radius, color) => {
+  ctx.beginPath()
+  ctx.arc(x, y, radius, 0, 2 * Math.PI, false) // specify that it's an arc
+  ctx.fillStyle = color // add a fill color
+  ctx.fill()
+  ctx.closePath()
+}
+
+const dots = (ctx, coords) => {
+  for (const [x, y] of coords) {
+    dot(ctx, x, y, 12, '#ffffff')
+    dot(ctx, x, y, 6, '#518dff')
+  }
+}
+
+const background = (ctx, coords) => {
+  ctx.beginPath()
+  ctx.lineWidth = 4
+  ctx.strokeStyle = 'rgba(255,255,255,0.62)'
+  ctx.lineTo(PADDING - MARGIN, DPI_HEIGHT)
+  for (const [x, y] of coords) {
+    ctx.lineTo(x, y)
+  }
+  ctx.lineTo(DPI_WIDTH - MARGIN, DPI_HEIGHT)
+  ctx.lineTo(PADDING - MARGIN, DPI_HEIGHT)
+  ctx.fillStyle = 'rgba(255,255,255,0.29)'
+  const gradient = ctx.createLinearGradient(0, DPI_WIDTH, 0, 0)
+  gradient.addColorStop(0, 'rgba(255,255,255,0.10)')
+  gradient.addColorStop(0.5, 'rgba(255,255,255,0.25)')
+  gradient.addColorStop(1, 'rgba(173,255,248,0.45)')
+  ctx.fillStyle = gradient
+  ctx.fill()
+  ctx.stroke()
+  ctx.closePath()
+}
+
 const toNum = (num) => Math.floor(num)
 
 const yAxis = (min, max) => {
@@ -41,6 +78,7 @@ const yAxis = (min, max) => {
 
 export default (canvas, data) => {
   const ctx = canvas.getContext('2d')
+  ctx.clearRect(0, 0, DPI_WIDTH, DPI_HEIGHT)
 
   const [yMin, yMax] = getMinMax(data)
   const yRatio = toNum(VIEW_HEIGHT / (yMax - yMin))
@@ -72,18 +110,21 @@ export default (canvas, data) => {
   ctx.strokeStyle = '#d6d6d6'
   ctx.font = 'bold 25px Helvetica,sans-serif'
   for (let i = 0; i <= data.length; i++) {
-    const x = xRatio * i + 20
+    const x = xRatio * i + MARGIN
     const text = Math.round(i + 1)
     ctx.fillText(text.toString(), x, DPI_HEIGHT - 10)
   }
   ctx.stroke()
   ctx.closePath()
 
-  line(
-    ctx,
-    data.map(([x, y]) => [
-      Math.floor(x * xRatio + 20),
-      Math.floor(DPI_HEIGHT - PADDING - y * yRatio),
-    ])
-  )
+  const preparedData = data.map(([x, y]) => [
+    Math.floor(x * xRatio + MARGIN),
+    Math.floor(DPI_HEIGHT - y * yRatio + PADDING),
+  ])
+
+  background(ctx, preparedData)
+
+  line(ctx, preparedData)
+
+  dots(ctx, preparedData)
 }
