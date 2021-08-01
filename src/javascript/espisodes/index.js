@@ -14,8 +14,8 @@ export const getListOfCharactersInSeasons = (list) => {
     }
   })
 
-  for (const [key, value] of Object.entries(charactersInSeasons)) {
-    result.push([Number(key), value])
+  for (const key in charactersInSeasons) {
+    result.push([key, charactersInSeasons[key]])
   }
 
   return result
