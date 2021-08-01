@@ -17,7 +17,6 @@ export const getList = async (limit, offset) => {
 
 export const getFiltredData = (rawData, filters) => {
   let filtredData = rawData
-  console.log('rawData = ', rawData)
 
   filters.forEach((filter) => {
     if (filter.isArray) {

@@ -5,21 +5,18 @@ export const getListOfCharactersInSeasons = (list) => {
   list.forEach((character) => {
     if (character.appearance) {
       character.appearance.forEach((season) => {
-        if (charactersInSeasons[season]) {
-          charactersInSeasons[season] += 1
+        if (charactersInSeasons[season - 1]) {
+          charactersInSeasons[season - 1] += 1
         } else {
-          charactersInSeasons[season] = 1
+          charactersInSeasons[season - 1] = 1
         }
       })
     }
   })
 
-  console.log(charactersInSeasons)
-
   for (const [key, value] of Object.entries(charactersInSeasons)) {
-    result.push([key, value])
+    result.push([Number(key), value])
   }
-  console.log('result = ', result)
 
   return result
 }

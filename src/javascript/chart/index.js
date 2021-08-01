@@ -78,10 +78,9 @@ const yAxis = (min, max) => {
 
 export default (canvas, data) => {
   const ctx = canvas.getContext('2d')
-  ctx.clearRect(0, 0, DPI_WIDTH, DPI_HEIGHT)
 
   const [yMin, yMax] = getMinMax(data)
-  const yRatio = toNum(VIEW_HEIGHT / (yMax - yMin))
+  const yRatio = (yMax - yMin) / VIEW_HEIGHT
   const xRatio = toNum((VIEW_WIDTH - PADDING) / (data.length - 1))
   const step = toNum(VIEW_HEIGHT / ROWS_COUNT)
   const textStep = toNum((yMax - yMin) / ROWS_COUNT)
@@ -91,6 +90,8 @@ export default (canvas, data) => {
 
   canvas.width = DPI_WIDTH
   canvas.height = DPI_HEIGHT
+
+  ctx.clearRect(0, 0, DPI_WIDTH, DPI_HEIGHT)
 
   ctx.beginPath()
   ctx.strokeStyle = '#d6d6d6'
@@ -117,10 +118,12 @@ export default (canvas, data) => {
   ctx.stroke()
   ctx.closePath()
 
-  const preparedData = data.map(([x, y]) => [
-    Math.floor(x * xRatio + MARGIN),
-    Math.floor(DPI_HEIGHT - y * yRatio + PADDING),
-  ])
+  const preparedData = data.map(([x, y]) => {
+    const xAxis = Math.floor(x * xRatio + MARGIN)
+    const yAxis = DPI_HEIGHT - PADDING - (y - yMin) / yRatio + 1
+
+    return [xAxis, yAxis]
+  })
 
   background(ctx, preparedData)
 

@@ -13,13 +13,19 @@ export const setItemToFilters = (filterStorage, filterItem) => {
     })
   }
   if (filterItem.value !== 'all') {
+    const isAlreadyActive = tempFilterStorage.find((filter) => {
+      return (
+        filter.value === filterItem.value && filter.field === filterItem.field
+      )
+    })
+
     tempFilterStorage = tempFilterStorage.filter((filter) => {
       return !(
         filter.value === filterItem.value && filter.field === filterItem.field
       )
     })
 
-    tempFilterStorage.push(filterItem)
+    if (!isAlreadyActive) tempFilterStorage.push(filterItem)
   }
 
   setToLocalStorage('filterStorage', tempFilterStorage)
